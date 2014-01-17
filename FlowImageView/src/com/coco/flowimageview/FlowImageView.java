@@ -35,7 +35,7 @@ import android.widget.Scroller;
  */
 public class FlowImageView extends ImageView {
 	private static final String TAG = "FlowImageView";
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 
 	private static void DEBUG_LOG(String msg) {
 		if (DEBUG) {
