@@ -211,7 +211,9 @@ public class FlowImageView extends ImageView {
 
 	private void stopFlow() {
 		mScroller.abortAnimation();
-		getHandler().removeCallbacks(mReverseFlowRunnable);
+		if (getHandler() != null) {
+			getHandler().removeCallbacks(mReverseFlowRunnable);
+		}
 		mFlowStarted = false;
 	}
 
