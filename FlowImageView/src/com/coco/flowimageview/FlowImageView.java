@@ -46,8 +46,8 @@ public class FlowImageView extends ImageView {
 		}
 	}
 
-	private static final float MIN_FLOW_VELOCITY = 1; // dips per second
-	private static final float DEFAULT_FLOW_VELOCITY = 1.5f; // dips per second
+	private static final float MIN_FLOW_VELOCITY = 0.3333f; // dips per second
+	private static final float DEFAULT_FLOW_VELOCITY = 0.6667f; // dips per second
 	private static final int DEFAULT_EDGE_DELAY = 2000; // ms
 
 	private float mMinFlowVelocity;
@@ -59,6 +59,7 @@ public class FlowImageView extends ImageView {
 	private boolean mIsLayouted;
 	private boolean mIsFlowInited;
 	private boolean mIsFlowPositive = true;
+	private boolean mFlowStarted;
 
 	private Matrix mImageMatrix = new Matrix();
 	private float mScale;
@@ -115,7 +116,7 @@ public class FlowImageView extends ImageView {
 			flowVelocity = mMinFlowVelocity;
 		}
 		mFlowVelocity = flowVelocity;
-		startFlow();
+		restartFlow();
 	}
 
 	public int getEdgeDelay() {
@@ -133,13 +134,25 @@ public class FlowImageView extends ImageView {
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
 		mIsLayouted = false;
+		startFlow();
 	}
 
 	@Override
 	protected void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
 		mIsLayouted = false;
-		getHandler().removeCallbacks(mReverseFlowRunnable);
+		stopFlow();
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasWindowFocus) {
+		super.onWindowFocusChanged(hasWindowFocus);
+		DEBUG_LOG("onWindowFocusChanged hasWindowFocus=" + hasWindowFocus);
+		if (hasWindowFocus) {
+			startFlow();
+		} else {
+			stopFlow();
+		}
 	}
 
 	@Override
@@ -169,6 +182,12 @@ public class FlowImageView extends ImageView {
 		}
 	}
 
+	private void restartFlow() {
+		if (mFlowStarted) {
+			startFlow();
+		}
+	}
+
 	private void startFlow() {
 		if (!mIsLayouted || !mIsFlowInited) {
 			return;
@@ -187,11 +206,18 @@ public class FlowImageView extends ImageView {
 		mScroller.abortAnimation();
 		mScroller.startScroll(sx * 100, 0, dx * 100, 0, duration);
 		ViewCompat.postInvalidateOnAnimation(this);
+		mFlowStarted = true;
+	}
+
+	private void stopFlow() {
+		mScroller.abortAnimation();
+		getHandler().removeCallbacks(mReverseFlowRunnable);
+		mFlowStarted = false;
 	}
 
 	@Override
 	public void computeScroll() {
-		if (!mIsLayouted || !mIsFlowInited) {
+		if (!mIsLayouted || !mIsFlowInited || !mFlowStarted) {
 			return;
 		}
 		if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
