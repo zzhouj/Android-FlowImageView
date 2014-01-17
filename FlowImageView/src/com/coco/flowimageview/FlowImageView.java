@@ -139,9 +139,9 @@ public class FlowImageView extends ImageView {
 
 	@Override
 	protected void onDetachedFromWindow() {
-		super.onDetachedFromWindow();
 		mIsLayouted = false;
 		stopFlow();
+		super.onDetachedFromWindow();
 	}
 
 	@Override
