@@ -24,6 +24,9 @@ package com.coco.flowimageview;
  */
 
 import android.content.Context;
+import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.animation.LinearInterpolator;
@@ -52,13 +55,21 @@ public class FlowImageView extends ImageView {
 	private int mEdgeDelay = DEFAULT_EDGE_DELAY;
 
 	private Scroller mScroller;
+
+	private boolean mIsLayouted;
+	private boolean mIsFlowInited;
 	private boolean mIsFlowPositive = true;
+
+	private Matrix mImageMatrix = new Matrix();
+	private float mScale;
+	private float mTranslateX;
+	private float mTranslateXEnd;
 
 	private final Runnable mReverseFlowRunnable = new Runnable() {
 		public void run() {
 			mIsFlowPositive = !mIsFlowPositive;
 			DEBUG_LOG("mReverseFlowRunnable mIsFlowPositive=" + mIsFlowPositive);
-			flow();
+			startFlow();
 		}
 	};
 
@@ -98,7 +109,7 @@ public class FlowImageView extends ImageView {
 			flowVelocity = mMinFlowVelocity;
 		}
 		mFlowVelocity = flowVelocity;
-		flow();
+		startFlow();
 	}
 
 	public int getEdgeDelay() {
@@ -110,36 +121,78 @@ public class FlowImageView extends ImageView {
 			edgeDelay = 0;
 		}
 		mEdgeDelay = edgeDelay;
-		flow();
 	}
 
 	@Override
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
-		flow();
+		mIsLayouted = false;
 	}
 
 	@Override
 	protected void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
+		mIsLayouted = false;
 		getHandler().removeCallbacks(mReverseFlowRunnable);
-	}
-
-	private void flow() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
-		DEBUG_LOG("onLayout");
+		DEBUG_LOG("onLayout changed=" + changed +
+				", left=" + left + ", top=" + top +
+				", right=" + right + ", bottom=" + bottom);
+		mIsLayouted = true;
+		initFlow();
+		startFlow();
+	}
+
+	private void initFlow() {
+		if (!mIsLayouted) {
+			return;
+		}
+		Drawable drawable = getDrawable();
+		if (drawable != null) {
+			final float viewWidth = getWidth();
+			final float viewHeight = getHeight();
+			final float imgWidth = drawable.getIntrinsicWidth();
+			final float imgHeight = drawable.getIntrinsicHeight();
+			mScale = viewHeight / imgHeight;
+			mTranslateXEnd = viewWidth - imgWidth * mScale;
+			mIsFlowInited = true;
+		}
+	}
+
+	private void startFlow() {
+		if (!mIsLayouted || !mIsFlowInited) {
+			return;
+		}
+		final int sx = (int) mTranslateX;
+		final int dx = (int) ((mIsFlowPositive ? mTranslateXEnd : 0) - mTranslateX);
+		final int duration = 0;
+		// TODO
+
+		mScroller.abortAnimation();
+		mScroller.startScroll(sx, 0, dx, 0, duration);
+		ViewCompat.postInvalidateOnAnimation(this);
 	}
 
 	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		super.onSizeChanged(w, h, oldw, oldh);
-		DEBUG_LOG("onSizeChanged");
+	public void computeScroll() {
+		if (!mIsLayouted || !mIsFlowInited) {
+			return;
+		}
+		if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
+			// TODO
+
+			// Keep on drawing until the animation has finished.
+			ViewCompat.postInvalidateOnAnimation(this);
+			return;
+		}
+
+		// Done with scroll, clean up state.
+		getHandler().removeCallbacks(mReverseFlowRunnable);
+		getHandler().postDelayed(mReverseFlowRunnable, mEdgeDelay);
 	}
 
 }
