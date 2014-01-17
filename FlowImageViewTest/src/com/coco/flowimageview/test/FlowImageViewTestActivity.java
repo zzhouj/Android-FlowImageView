@@ -15,6 +15,7 @@ public class FlowImageViewTestActivity extends Activity {
 		setContentView(R.layout.flow_image_view_test);
 
 		mFlowImageView = (FlowImageView) findViewById(R.id.flow_image);
+		mFlowImageView.setFlowVelocity(200);
 	}
 
 }

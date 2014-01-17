@@ -104,6 +104,12 @@ public class FlowImageView extends ImageView {
 		return mFlowVelocity;
 	}
 
+	/**
+	 * Setting flow velocity.
+	 * 
+	 * @param flowVelocity
+	 *            pixels per second
+	 */
 	public void setFlowVelocity(float flowVelocity) {
 		if (flowVelocity < mMinFlowVelocity) {
 			flowVelocity = mMinFlowVelocity;
@@ -174,7 +180,7 @@ public class FlowImageView extends ImageView {
 			getHandler().post(mReverseFlowRunnable);
 			return;
 		}
-		final int duration = (int) (dx * mFlowVelocity * 1000);
+		final int duration = (int) Math.abs(dx / mFlowVelocity * 1000);
 		DEBUG_LOG("startFlow mIsFlowPositive=" + mIsFlowPositive +
 				", mTranslateX=" + mTranslateX + ", mTranslateXEnd=" + mTranslateXEnd +
 				", sx=" + sx + ", dx=" + dx + ", duration=" + duration);
