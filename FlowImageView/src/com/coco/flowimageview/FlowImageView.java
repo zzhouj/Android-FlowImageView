@@ -26,7 +26,9 @@ package com.coco.flowimageview;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+import android.widget.Scroller;
 
 /**
  * Zaker style flow image view, it's image horizontal scrolling slowly, using as Zaker's main screen background.
@@ -40,6 +42,25 @@ public class FlowImageView extends ImageView {
 			Log.v(TAG, msg);
 		}
 	}
+
+	private static final float MIN_FLOW_VELOCITY = 1; // dips per second
+	private static final float DEFAULT_FLOW_VELOCITY = 1.5f; // dips per second
+	private static final int DEFAULT_EDGE_DELAY = 2000; // ms
+
+	private float mMinFlowVelocity;
+	private float mFlowVelocity;
+	private int mEdgeDelay = DEFAULT_EDGE_DELAY;
+
+	private Scroller mScroller;
+	private boolean mIsFlowPositive = true;
+
+	private final Runnable mReverseFlowRunnable = new Runnable() {
+		public void run() {
+			mIsFlowPositive = !mIsFlowPositive;
+			DEBUG_LOG("mReverseFlowRunnable mIsFlowPositive=" + mIsFlowPositive);
+			flow();
+		}
+	};
 
 	public FlowImageView(Context context) {
 		super(context);
@@ -57,8 +78,68 @@ public class FlowImageView extends ImageView {
 	}
 
 	private void initFlowImageView() {
+		setScaleType(ImageView.ScaleType.MATRIX);
+
+		final Context context = getContext();
+		final float density = context.getResources().getDisplayMetrics().density;
+
+		mMinFlowVelocity = MIN_FLOW_VELOCITY * density;
+		mFlowVelocity = DEFAULT_FLOW_VELOCITY * density;
+
+		mScroller = new Scroller(context, new LinearInterpolator());
+	}
+
+	public float getFlowVelocity() {
+		return mFlowVelocity;
+	}
+
+	public void setFlowVelocity(float flowVelocity) {
+		if (flowVelocity < mMinFlowVelocity) {
+			flowVelocity = mMinFlowVelocity;
+		}
+		mFlowVelocity = flowVelocity;
+		flow();
+	}
+
+	public int getEdgeDelay() {
+		return mEdgeDelay;
+	}
+
+	public void setEdgeDelay(int edgeDelay) {
+		if (edgeDelay < 0) {
+			edgeDelay = 0;
+		}
+		mEdgeDelay = edgeDelay;
+		flow();
+	}
+
+	@Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+		flow();
+	}
+
+	@Override
+	protected void onDetachedFromWindow() {
+		super.onDetachedFromWindow();
+		getHandler().removeCallbacks(mReverseFlowRunnable);
+	}
+
+	private void flow() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+		super.onLayout(changed, left, top, right, bottom);
+		DEBUG_LOG("onLayout");
+	}
+
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+		DEBUG_LOG("onSizeChanged");
 	}
 
 }
