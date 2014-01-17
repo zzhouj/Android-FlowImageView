@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
     <com.coco.flowimageview.FlowImageView
         android:id="@+id/flow_image"
@@ -10,4 +9,62 @@
         android:layout_height="match_parent"
         android:src="@drawable/rootblock_default_bg" />
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/cell_ordinary_l"
+        android:orientation="vertical"
+        android:padding="15dp" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Flow velocity: "
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/flow_velocity_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/flow_velocity_seek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="20000" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edge delay: "
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/edge_delay_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/edge_delay_seek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="5000" />
+    </LinearLayout>
+
+</FrameLayout>
