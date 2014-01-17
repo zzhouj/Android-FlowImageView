@@ -169,11 +169,17 @@ public class FlowImageView extends ImageView {
 		}
 		final int sx = (int) mTranslateX;
 		final int dx = (int) ((mIsFlowPositive ? mTranslateXEnd : 0) - mTranslateX);
-		final int duration = 0;
-		// TODO
-
+		if (dx == 0) {
+			getHandler().removeCallbacks(mReverseFlowRunnable);
+			getHandler().post(mReverseFlowRunnable);
+			return;
+		}
+		final int duration = (int) (dx * mFlowVelocity * 1000);
+		DEBUG_LOG("startFlow mIsFlowPositive=" + mIsFlowPositive +
+				", mTranslateX=" + mTranslateX + ", mTranslateXEnd=" + mTranslateXEnd +
+				", sx=" + sx + ", dx=" + dx + ", duration=" + duration);
 		mScroller.abortAnimation();
-		mScroller.startScroll(sx, 0, dx, 0, duration);
+		mScroller.startScroll(sx * 100, 0, dx * 100, 0, duration);
 		ViewCompat.postInvalidateOnAnimation(this);
 	}
 
@@ -183,7 +189,9 @@ public class FlowImageView extends ImageView {
 			return;
 		}
 		if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
-			// TODO
+			mTranslateX = mScroller.getCurrX() / 100f;
+			DEBUG_LOG("computeScroll mTranslateX=" + mTranslateX);
+			setImageMatrix();
 
 			// Keep on drawing until the animation has finished.
 			ViewCompat.postInvalidateOnAnimation(this);
@@ -193,6 +201,13 @@ public class FlowImageView extends ImageView {
 		// Done with scroll, clean up state.
 		getHandler().removeCallbacks(mReverseFlowRunnable);
 		getHandler().postDelayed(mReverseFlowRunnable, mEdgeDelay);
+	}
+
+	private void setImageMatrix() {
+		mImageMatrix.reset();
+		mImageMatrix.postScale(mScale, mScale);
+		mImageMatrix.postTranslate(mTranslateX, 0);
+		setImageMatrix(mImageMatrix);
 	}
 
 }
