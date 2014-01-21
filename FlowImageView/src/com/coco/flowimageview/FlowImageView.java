@@ -205,8 +205,8 @@ public class FlowImageView extends ImageView {
 				", sx=" + sx + ", dx=" + dx + ", duration=" + duration);
 		mScroller.abortAnimation();
 		mScroller.startScroll(sx * 100, 0, dx * 100, 0, duration);
-		ViewCompat.postInvalidateOnAnimation(this);
 		mFlowStarted = true;
+		ViewCompat.postInvalidateOnAnimation(this);
 	}
 
 	private void stopFlow() {
@@ -233,7 +233,7 @@ public class FlowImageView extends ImageView {
 		}
 
 		// Done with scroll, clean up state.
-		getHandler().removeCallbacks(mReverseFlowRunnable);
+		stopFlow();
 		getHandler().postDelayed(mReverseFlowRunnable, mEdgeDelay);
 	}
 
