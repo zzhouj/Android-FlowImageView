@@ -56,7 +56,6 @@ public class FlowImageView extends ImageView {
 
 	private Scroller mScroller;
 
-	private boolean mIsLayouted;
 	private boolean mIsFlowInited;
 	private boolean mIsFlowPositive = true;
 	private boolean mFlowStarted;
@@ -101,6 +100,19 @@ public class FlowImageView extends ImageView {
 		mScroller = new Scroller(context, new LinearInterpolator());
 	}
 
+	@Override
+	public void setEnabled(boolean enabled) {
+		if (enabled == isEnabled()) {
+			return;
+		}
+		super.setEnabled(enabled);
+		if (enabled) {
+			startFlow();
+		} else {
+			stopFlow();
+		}
+	}
+
 	public float getFlowVelocity() {
 		return mFlowVelocity;
 	}
@@ -133,13 +145,11 @@ public class FlowImageView extends ImageView {
 	@Override
 	protected void onAttachedToWindow() {
 		super.onAttachedToWindow();
-		mIsLayouted = false;
 		startFlow();
 	}
 
 	@Override
 	protected void onDetachedFromWindow() {
-		mIsLayouted = false;
 		stopFlow();
 		super.onDetachedFromWindow();
 	}
@@ -161,15 +171,11 @@ public class FlowImageView extends ImageView {
 		DEBUG_LOG("onLayout changed=" + changed +
 				", left=" + left + ", top=" + top +
 				", right=" + right + ", bottom=" + bottom);
-		mIsLayouted = true;
 		initFlow();
 		startFlow();
 	}
 
 	private void initFlow() {
-		if (!mIsLayouted) {
-			return;
-		}
 		Drawable drawable = getDrawable();
 		if (drawable != null) {
 			final float viewWidth = getWidth();
@@ -179,6 +185,9 @@ public class FlowImageView extends ImageView {
 			mScale = viewHeight / imgHeight;
 			mTranslateXEnd = viewWidth - imgWidth * mScale;
 			mIsFlowInited = true;
+			setImageMatrix();
+		} else {
+			mIsFlowInited = false;
 		}
 	}
 
@@ -189,7 +198,7 @@ public class FlowImageView extends ImageView {
 	}
 
 	private void startFlow() {
-		if (!mIsLayouted || !mIsFlowInited) {
+		if (!isEnabled() || !mIsFlowInited) {
 			return;
 		}
 		final int sx = (int) mTranslateX;
@@ -219,7 +228,7 @@ public class FlowImageView extends ImageView {
 
 	@Override
 	public void computeScroll() {
-		if (!mIsLayouted || !mIsFlowInited || !mFlowStarted) {
+		if (!isEnabled() || !mIsFlowInited || !mFlowStarted) {
 			return;
 		}
 		if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
